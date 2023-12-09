@@ -38,3 +38,26 @@ export async function getUserUrls(req, res) {
     res.sendStatus(500);
   }
 }
+
+export async function getRanking(req, res) {
+  try {
+    const queryRanking = await connection.query(
+      `
+          SELECT users.id AS id, users.name AS name, COUNT(links."shortUrl") AS linksCount, SUM(links."urlVisits") AS visitCount
+          FROM users
+          LEFT JOIN links
+          ON users.id=links."userId"
+          GROUP BY users.id
+          
+            `
+    );
+
+    if (queryRanking.rowCount) {
+      return res.status(200).send(queryRanking.rows);
+    }
+    return res.sendStatus(404);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+}
